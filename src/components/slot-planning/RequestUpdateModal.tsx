@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Dialog,
   DialogContent,
@@ -58,6 +59,9 @@ export function RequestUpdateModal({
     }
   };
 
+  const [selectedVisitId, setSelectedVisitId] = useState<number | null>(null)
+
+
   const handleSubmit = () => {
     onSubmit({
       visitType,
@@ -106,39 +110,40 @@ export function RequestUpdateModal({
           </div>
 
           {/* Visits List */}
-          {visitType && (
-            <div className="space-y-2">
-              <Label>Select Visits to Update</Label>
-              <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-                {filteredVisits.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-2">
-                    No {visitType} visits scheduled for today
-                  </p>
-                ) : (
-                  filteredVisits.map((visit) => (
-                    <div
-                      key={visit.id}
-                      className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50"
-                    >
-                      <Checkbox
-                        id={`visit-${visit.id}`}
-                        checked={selectedVisits.includes(visit.id)}
-                        onCheckedChange={(checked) =>
-                          handleVisitToggle(visit.id, checked as boolean)
-                        }
-                      />
-                      <label
-                        htmlFor={`visit-${visit.id}`}
-                        className="text-sm font-medium cursor-pointer flex-1"
-                      >
-                        {visit.name}
-                      </label>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
+
+{visitType && (
+  <div className="space-y-2">
+    <Label>Select Visit to Update</Label>
+
+    <RadioGroup
+      value={selectedVisitId?.toString()}
+      onValueChange={(value) => setSelectedVisitId(Number(value))}
+      className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2"
+    >
+      {filteredVisits.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-2">
+          No {visitType} visits scheduled for today
+        </p>
+      ) : (
+        filteredVisits.map((visit) => (
+          <div
+            key={visit.id}
+            className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50"
+          >
+            <RadioGroupItem value={visit.id.toString()} id={`visit-${visit.id}`} />
+            <label
+              htmlFor={`visit-${visit.id}`}
+              className="text-sm font-medium cursor-pointer flex-1"
+            >
+              {visit.name}
+            </label>
+          </div>
+        ))
+      )}
+    </RadioGroup>
+  </div>
+)}
+
 
           {/* Notes */}
           <div className="space-y-2">
