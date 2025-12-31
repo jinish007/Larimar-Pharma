@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Send } from "lucide-react";
 
 interface Visit {
@@ -31,7 +30,11 @@ interface RequestUpdateModalProps {
   onOpenChange: (open: boolean) => void;
   doctorVisits: Visit[];
   pharmacistVisits: Visit[];
-  onSubmit: (data: { visitType: string; selectedVisits: number[]; notes: string }) => void;
+  onSubmit: (data: {
+    visitType: string;
+    visitId: number;
+    notes: string;
+  }) => void;
 }
 
 export function RequestUpdateModal({
@@ -42,7 +45,7 @@ export function RequestUpdateModal({
   onSubmit,
 }: RequestUpdateModalProps) {
   const [visitType, setVisitType] = useState<string>("");
-  const [selectedVisits, setSelectedVisits] = useState<number[]>([]);
+  const [selectedVisitId, setSelectedVisitId] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
 
   const filteredVisits = useMemo(() => {
@@ -51,35 +54,28 @@ export function RequestUpdateModal({
     return [];
   }, [visitType, doctorVisits, pharmacistVisits]);
 
-  const handleVisitToggle = (visitId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedVisits((prev) => [...prev, visitId]);
-    } else {
-      setSelectedVisits((prev) => prev.filter((id) => id !== visitId));
-    }
+  const resetForm = () => {
+    setVisitType("");
+    setSelectedVisitId(null);
+    setNotes("");
   };
 
-  const [selectedVisitId, setSelectedVisitId] = useState<number | null>(null)
-
-
   const handleSubmit = () => {
+    if (!selectedVisitId) return;
+
     onSubmit({
       visitType,
-      selectedVisits,
+      visitId: selectedVisitId,
       notes,
     });
-    // Reset form
-    setVisitType("");
-    setSelectedVisits([]);
-    setNotes("");
+
+    resetForm();
     onOpenChange(false);
   };
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      setVisitType("");
-      setSelectedVisits([]);
-      setNotes("");
+      resetForm();
     }
     onOpenChange(isOpen);
   };
@@ -92,13 +88,16 @@ export function RequestUpdateModal({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Visit Type Selection */}
+          {/* Visit Type */}
           <div className="space-y-2">
             <Label>Visit Type</Label>
-            <Select value={visitType} onValueChange={(value) => {
-              setVisitType(value);
-              setSelectedVisits([]);
-            }}>
+            <Select
+              value={visitType}
+              onValueChange={(value) => {
+                setVisitType(value);
+                setSelectedVisitId(null);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select visit type" />
               </SelectTrigger>
@@ -109,41 +108,44 @@ export function RequestUpdateModal({
             </Select>
           </div>
 
-          {/* Visits List */}
+          {/* Visit Selection */}
+          {visitType && (
+            <div className="space-y-2">
+              <Label>Select Visit to Update</Label>
 
-{visitType && (
-  <div className="space-y-2">
-    <Label>Select Visit to Update</Label>
-
-    <RadioGroup
-      value={selectedVisitId?.toString()}
-      onValueChange={(value) => setSelectedVisitId(Number(value))}
-      className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2"
-    >
-      {filteredVisits.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-2">
-          No {visitType} visits scheduled for today
-        </p>
-      ) : (
-        filteredVisits.map((visit) => (
-          <div
-            key={visit.id}
-            className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50"
-          >
-            <RadioGroupItem value={visit.id.toString()} id={`visit-${visit.id}`} />
-            <label
-              htmlFor={`visit-${visit.id}`}
-              className="text-sm font-medium cursor-pointer flex-1"
-            >
-              {visit.name}
-            </label>
-          </div>
-        ))
-      )}
-    </RadioGroup>
-  </div>
-)}
-
+              <RadioGroup
+                value={selectedVisitId?.toString()}
+                onValueChange={(value) =>
+                  setSelectedVisitId(Number(value))
+                }
+                className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2"
+              >
+                {filteredVisits.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-2">
+                    No {visitType} visits scheduled for today
+                  </p>
+                ) : (
+                  filteredVisits.map((visit) => (
+                    <div
+                      key={visit.id}
+                      className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50"
+                    >
+                      <RadioGroupItem
+                        value={visit.id.toString()}
+                        id={`visit-${visit.id}`}
+                      />
+                      <label
+                        htmlFor={`visit-${visit.id}`}
+                        className="text-sm font-medium cursor-pointer flex-1"
+                      >
+                        {visit.name}
+                      </label>
+                    </div>
+                  ))
+                )}
+              </RadioGroup>
+            </div>
+          )}
 
           {/* Notes */}
           <div className="space-y-2">
@@ -164,7 +166,7 @@ export function RequestUpdateModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!visitType || selectedVisits.length === 0 || !notes.trim()}
+            disabled={!visitType || !selectedVisitId || !notes.trim()}
           >
             <Send className="h-4 w-4 mr-2" />
             Request
