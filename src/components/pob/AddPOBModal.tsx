@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { CalendarIcon, Plus, Trash2, Check } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-interface ProductRow {
+export interface ProductRow {
   id: string;
   productName: string;
   qty: number;
@@ -25,10 +25,23 @@ interface ProductRow {
   total: number;
 }
 
+export interface POBFormData {
+  id?: string;
+  doctorName: string;
+  hospitalName: string;
+  orderDate: Date;
+  products: ProductRow[];
+  totalValue: number;
+  discount: number;
+  notes: string;
+  status?: "pending" | "confirmed" | "cancelled";
+}
+
 interface AddPOBModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: POBFormData) => void;
+  editData?: POBFormData | null;
 }
 
 const mockProducts = [
@@ -59,11 +72,12 @@ const mockHospitals = [
   "Life Care Clinic",
 ];
 
-const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
+const AddPOBModal = ({ isOpen, onClose, onSubmit, editData }: AddPOBModalProps) => {
   const [doctorName, setDoctorName] = useState("");
   const [hospitalName, setHospitalName] = useState("");
   const [orderDate, setOrderDate] = useState<Date>();
   const [notes, setNotes] = useState("");
+  const [discount, setDiscount] = useState(0);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [doctorOpen, setDoctorOpen] = useState(false);
   const [hospitalOpen, setHospitalOpen] = useState(false);
@@ -72,6 +86,31 @@ const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
   const [newProduct, setNewProduct] = useState("");
   const [newQty, setNewQty] = useState(1);
   const [productOpen, setProductOpen] = useState(false);
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editData) {
+      setDoctorName(editData.doctorName);
+      setHospitalName(editData.hospitalName);
+      setOrderDate(editData.orderDate);
+      setNotes(editData.notes);
+      setDiscount(editData.discount || 0);
+      setProducts(editData.products);
+    } else {
+      resetForm();
+    }
+  }, [editData, isOpen]);
+
+  const resetForm = () => {
+    setDoctorName("");
+    setHospitalName("");
+    setOrderDate(undefined);
+    setNotes("");
+    setDiscount(0);
+    setProducts([]);
+    setNewProduct("");
+    setNewQty(1);
+  };
 
   const getProductPrice = (productName: string) => {
     const product = mockProducts.find(p => p.name === productName);
@@ -108,27 +147,30 @@ const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
     }));
   };
 
-  const totalOrderValue = products.reduce((sum, p) => sum + p.total, 0);
+  const subtotal = products.reduce((sum, p) => sum + p.total, 0);
+  const totalOrderValue = subtotal - discount;
 
   const handleSubmit = () => {
     if (!doctorName || !hospitalName || !orderDate || products.length === 0) return;
     
     onSubmit({
+      id: editData?.id,
       doctorName,
       hospitalName,
       orderDate,
       products,
       totalValue: totalOrderValue,
+      discount,
       notes,
-      status: "pending",
+      status: editData?.status || "pending",
     });
     
-    // Reset form
-    setDoctorName("");
-    setHospitalName("");
-    setOrderDate(undefined);
-    setNotes("");
-    setProducts([]);
+    resetForm();
+    onClose();
+  };
+
+  const handleClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -145,10 +187,10 @@ const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New POB Order</DialogTitle>
+          <DialogTitle>{editData ? "Edit POB Order" : "Add New POB Order"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -381,16 +423,35 @@ const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
                   </TableBody>
                   <TableFooter>
                     <TableRow>
-                      <TableCell colSpan={3} className="text-right font-bold">
-                        Total Order Value:
+                      <TableCell colSpan={3} className="text-right">
+                        Subtotal:
                       </TableCell>
-                      <TableCell className="text-right font-bold text-lg">
-                        ₹{totalOrderValue.toLocaleString()}
+                      <TableCell className="text-right font-medium">
+                        ₹{subtotal.toLocaleString()}
                       </TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </TableFooter>
                 </Table>
+              </div>
+            )}
+          </div>
+
+          {/* Discount */}
+          <div className="space-y-2">
+            <Label>Discount (₹)</Label>
+            <Input
+              type="number"
+              min="0"
+              max={subtotal}
+              value={discount}
+              onChange={(e) => setDiscount(Math.min(parseInt(e.target.value) || 0, subtotal))}
+              placeholder="Enter discount amount"
+            />
+            {products.length > 0 && (
+              <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
+                <span className="font-semibold">Final Total (after discount):</span>
+                <span className="text-xl font-bold text-primary">₹{totalOrderValue.toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -412,7 +473,7 @@ const AddPOBModal = ({ isOpen, onClose, onSubmit }: AddPOBModalProps) => {
             className="w-full"
             disabled={!doctorName || !hospitalName || !orderDate || products.length === 0}
           >
-            Submit Order
+            {editData ? "Update Order" : "Submit Order"}
           </Button>
         </div>
       </DialogContent>
