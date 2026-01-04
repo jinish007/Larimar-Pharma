@@ -96,7 +96,6 @@ const CompetitiveBrands = () => {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <Header />
         <div className="p-6 space-y-6">
           <div>
             <h1 className="text-2xl font-display font-bold">Competitive Brands</h1>
