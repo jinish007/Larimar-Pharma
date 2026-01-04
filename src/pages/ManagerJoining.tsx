@@ -91,7 +91,7 @@ const ManagerJoining = () => {
         <div className="max-w-6xl mx-auto space-y-6">
           <div>
             <h1 className="text-2xl font-bold">Manager Joining</h1>
-            <p className="text-muted-foreground">Track and record manager joinings with doctors</p>
+            <p className="text-muted-foreground">Track and record manager joinings with doctors , managers typically join 2-3 times per week.</p>
           </div>
 
           <StatsCards {...stats} />
