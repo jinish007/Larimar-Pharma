@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
 import StatsCards from "@/components/promotions/StatsCards";
 import PromotionFilters, { PromotionType } from "@/components/promotions/PromotionFilters";
 import PromotionList, { Promotion } from "@/components/promotions/PromotionList";
@@ -97,8 +96,6 @@ const Promotions = () => {
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
-        <Header />
-
         <main className="flex-1 p-6 overflow-auto">
           {/* Subheading */}
           <p className="text-sm text-muted-foreground mb-6">
