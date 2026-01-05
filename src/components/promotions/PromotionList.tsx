@@ -105,9 +105,19 @@ const PromotionList = ({ promotions, onUsePromotion }: PromotionListProps) => {
                     <Users className="h-4 w-4" />
                     <span>Target: <span className="text-foreground">{promotion.targetAudience}</span></span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Gift className="h-4 w-4" />
-                    <span>Benefits: <span className="text-foreground">{promotion.benefitsAndOffers}</span></span>
+                  <div className="flex items-start gap-2 text-muted-foreground">
+                    <Gift className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="text-xs">Benefits:</span>
+                      <ul className="mt-1 space-y-1">
+                        {promotion.benefitsAndOffers.split(",").map((benefit, idx) => (
+                          <li key={idx} className="text-foreground text-sm flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0" />
+                            {benefit.trim()}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
