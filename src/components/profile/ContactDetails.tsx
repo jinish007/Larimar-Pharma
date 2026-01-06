@@ -46,70 +46,69 @@ const ContactDetails = () => {
   return (
     <>
       <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-5">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Avatar */}
-            <Avatar className="w-20 h-20">
-              <AvatarImage src={contactInfo.image} alt={contactInfo.name} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
-                {contactInfo.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex flex-col gap-4">
+            {/* Top row: Avatar, Name, and Update Button */}
+            <div className="flex items-center gap-4">
+              <Avatar className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0">
+                <AvatarImage src={contactInfo.image} alt={contactInfo.name} />
+                <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
+                  {contactInfo.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">
+                  {contactInfo.name}
+                </h3>
+                <p className="text-xs text-muted-foreground">Product Development Executive</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditForm(contactInfo);
+                  setIsModalOpen(true);
+                }}
+                className="gap-1.5 flex-shrink-0"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Update</span>
+              </Button>
+            </div>
 
-            {/* Details */}
-            <div className="flex-1 space-y-3">
-              <h3 className="text-lg font-semibold text-foreground">
-                {contactInfo.name}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Phone className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="text-sm font-medium">{contactInfo.phone}</p>
-                  </div>
+            {/* Contact Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-4 h-4 text-primary" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Mail className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium">{contactInfo.email}</p>
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="text-sm font-medium truncate">{contactInfo.phone}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
-                    <AlertCircle className="w-4 h-4 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Emergency</p>
-                    <p className="text-sm font-medium">
-                      {contactInfo.emergencyNumber}
-                    </p>
-                  </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium truncate">{contactInfo.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-9 h-9 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">Emergency</p>
+                  <p className="text-sm font-medium truncate">{contactInfo.emergencyNumber}</p>
                 </div>
               </div>
             </div>
-
-            {/* Update Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEditForm(contactInfo);
-                setIsModalOpen(true);
-              }}
-              className="gap-2"
-            >
-              <Pencil className="w-4 h-4" />
-              Update
-            </Button>
           </div>
         </CardContent>
       </Card>
